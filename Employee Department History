@@ -1,0 +1,43 @@
+--Q1
+SELECT 
+      h."BusinessEntityID", 
+      p."FirstName", 
+      p."LastName", 
+      h."JobTitle"
+FROM person.person p
+JOIN humanresources.employee h 
+  ON h."BusinessEntityID" = p."BusinessEntityID"
+JOIN humanresources.employee_department_history dh 
+  ON h."BusinessEntityID" = dh."BusinessEntityID"
+WHERE dh."EndDate" IS NULL
+ORDER BY 3,2
+
+--Q2
+SELECT 
+      p."FirstName", 
+      p."LastName", 
+      h."HireDate", 
+      h."JobTitle"
+FROM humanresources.employee h
+JOIN person.person p 
+  ON h."BusinessEntityID" = p."BusinessEntityID"
+WHERE h."HireDate" > '2008-01-01'
+ORDER BY 3 
+
+--Q3
+SELECT distinct
+      p."FirstName", 
+      p."LastName",  
+      e."JobTitle"
+FROM humanresources.employee e
+JOIN person.person p 
+  ON e."BusinessEntityID" = p."BusinessEntityID"
+JOIN humanresources.employee_department_history dh 
+  ON e."BusinessEntityID" = dh."BusinessEntityID"
+JOIN humanresources.department d
+  ON dh."DepartmentID" = d."DepartmentID"
+WHERE d."Name" IN ('Engineering', 'Research and Development')
+  AND dh."EndDate" IS NULL
+
+
+
