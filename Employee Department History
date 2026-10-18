@@ -1,3 +1,11 @@
+SELECT * from 
+	humanresources.employee
+      humanresources.department
+      humanresources.employee_department_history
+      person.person
+      person.phone
+      person.phone_number_type
+
 --Q1
 SELECT 
       h."BusinessEntityID", 
