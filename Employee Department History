@@ -39,5 +39,151 @@ JOIN humanresources.department d
 WHERE d."Name" IN ('Engineering', 'Research and Development')
   AND dh."EndDate" IS NULL
 
+--Q4
+SELECT 
+      p."FirstName", 
+      p."LastName",  
+      e."JobTitle"
+FROM humanresources.employee e
+JOIN person.person p 
+  ON e."BusinessEntityID" = p."BusinessEntityID"
+WHERE e."JobTitle" = 'Design Engineer'
+
+union
+
+SELECT 
+      p."FirstName", 
+      p."LastName",  
+      e."JobTitle"
+FROM humanresources.employee e
+JOIN person.person p 
+  ON e."BusinessEntityID" = p."BusinessEntityID"
+WHERE e."JobTitle" = 'Control Specialist'
+
+--Q5
+SELECT 
+      p."FirstName", 
+      p."LastName",
+      d."Name" AS "DepartmentName", 
+      e."JobTitle"
+FROM humanresources.employee e
+JOIN person.person p 
+  ON e."BusinessEntityID" = p."BusinessEntityID"
+JOIN humanresources.employee_department_history dh 
+  ON e."BusinessEntityID" = dh."BusinessEntityID"
+JOIN humanresources.department d
+  ON dh."DepartmentID" = d."DepartmentID"
+WHERE dh."EndDate" IS NULL
+
+--Q6
+SELECT 
+      p."BusinessEntityID",
+      p."FirstName", 
+      p."LastName"
+FROM humanresources.employee e
+JOIN person.person p 
+  ON e."BusinessEntityID" = p."BusinessEntityID"
+JOIN humanresources.employee_department_history dh 
+  ON e."BusinessEntityID" = dh."BusinessEntityID"
+LEFT JOIN person.phone pp ON pp."BusinessEntityID" = p."BusinessEntityID"
+WHERE dh."EndDate" IS NULL AND pp."BusinessEntityID" IS NULL
+
+--Q7
+SELECT 
+      e."BusinessEntityID",
+      pp."PhoneNumber"
+FROM humanresources.employee e
+JOIN person.phone pp ON pp."BusinessEntityID" = e."BusinessEntityID"
+
+--Q8
+SELECT 
+      p."FirstName", 
+      p."LastName"
+FROM humanresources.employee e
+JOIN person.person p 
+  ON e."BusinessEntityID" = p."BusinessEntityID"
+WHERE e."JobTitle" = 'Design Engineer'
+
+except
+
+SELECT 
+      p."FirstName", 
+      p."LastName"
+FROM humanresources.employee e
+JOIN person.person p 
+  ON e."BusinessEntityID" = p."BusinessEntityID"
+JOIN humanresources.employee_department_history dh 
+  ON e."BusinessEntityID" = dh."BusinessEntityID"
+JOIN humanresources.department d
+  ON dh."DepartmentID" = d."DepartmentID"
+WHERE d."Name" = 'Engineering'
+
+--Q9
+
+SELECT
+    p."BusinessEntityID",
+    p."FirstName",
+    p."LastName",
+    pp."PhoneNumber"
+FROM person.person p
+JOIN humanresources.employee e
+    ON p."BusinessEntityID" = e."BusinessEntityID"
+JOIN humanresources.employee_department_history dh
+    ON e."BusinessEntityID" = dh."BusinessEntityID"
+JOIN person.phone pp
+    ON pp."BusinessEntityID" = e."BusinessEntityID"
+JOIN person.phone_number_type nt
+    ON pp."PhoneNumberTypeID" = nt."PhoneNumberTypeID"
+WHERE dh."EndDate" IS NULL
+  AND nt."Name" = 'Cell';
 
 
+--Q10
+SELECT
+      p."FirstName", 
+      p."LastName"
+FROM person.person p
+JOIN humanresources.employee e
+    ON p."BusinessEntityID" = e."BusinessEntityID"
+JOIN humanresources.employee_department_history dh
+    ON e."BusinessEntityID" = dh."BusinessEntityID"
+JOIN humanresources.department d 
+    ON d."DepartmentID" = dh."DepartmentID"
+WHERE dh."EndDate" IS NULL AND d."Name" = 'Engineering'
+
+intersect
+
+SELECT
+      p."FirstName", 
+      p."LastName"
+FROM person.person p
+JOIN humanresources.employee e 
+    ON p."BusinessEntityID" = e."BusinessEntityID"
+WHERE e."JobTitle" = 'Design Engineer' 
+
+ 
+
+--Q11
+SELECT
+      p."FirstName", 
+      p."LastName",
+      'Department' AS "SourceLabel"
+FROM person.person p
+JOIN humanresources.employee e
+    ON p."BusinessEntityID" = e."BusinessEntityID"
+JOIN humanresources.employee_department_history dh
+    ON e."BusinessEntityID" = dh."BusinessEntityID"
+JOIN humanresources.department d 
+    ON d."DepartmentID" = dh."DepartmentID"
+WHERE dh."EndDate" IS NULL AND d."Name" = 'Engineering'
+
+UNION ALL
+
+SELECT
+      p."FirstName", 
+      p."LastName",
+      'Title' AS "SourceLabel"
+FROM person.person p
+JOIN humanresources.employee e 
+    ON p."BusinessEntityID" = e."BusinessEntityID"
+WHERE e."JobTitle" = 'Design Engineer'
