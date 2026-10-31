@@ -1,0 +1,95 @@
+--A1. How many orders were placed in 2026 that were not cancelled?
+SELECT *
+FROM orders
+
+SELECT COUNT (*)
+FROM orders
+WHERE order_date >= '2026-01-01' AND 
+      order_date < '2027-01-01' AND
+      status != 'cancelled'
+
+--A2. Which product category generated the most revenue in 2026 from non-cancelled orders, and how much?
+SELECT *
+FROM orders
+SELECT *
+FROM products
+SELECT *
+FROM order_items
+
+SELECT p.category, SUM (i.unit_price*i.quantity*COALESCE(i.rental_days, 1))
+FROM products p
+JOIN order_items i ON p.product_id = i.product_id
+JOIN orders o ON i.order_id = o.order_id
+WHERE o.order_date >= '2026-01-01' AND 
+      o.order_date < '2027-01-01' AND
+      o.status != 'cancelled'
+GROUP BY p.category
+ORDER BY 1 desc
+LIMIT 1
+
+--A3. Across all five years, what percentage of phone-channel orders were cancelled? Give two decimal places
+SELECT *
+FROM v_channel_performance
+SELECT *
+FROM v_sales_detail
+
+SELECT extract(year from order_date)
+FROM v_sales_detail
+GROUP BY 1
+
+SELECT ROUND (100* COUNT (*) FILTER (WHERE status = 'cancelled') 
+            /COUNT (*), 2) AS percentage
+FROM v_sales_detail 
+WHERE order_date >='2022-01-01' and
+      order_date <'2027-01-01' and
+      channel ='phone'
+
+
+--A4. On non-cancelled lodge orders placed in 2026, how far below list price was the total amount charged? Express the gap as a percentage of the total list value, two decimal places.
+SELECT distinct customer_type
+FROM v_customer_value
+SELECT *
+FROM v_product_performance
+SELECT *
+FROM v_customer_value
+SELECT *
+FROM products
+SELECT *
+FROM orders
+
+
+SELECT ROUND (100.0*
+            SUM ((p.sale_price*sd.quantity*COALESCE(sd.rental_days, 1)) 
+            - (sd.unit_price*sd.quantity*COALESCE(sd.rental_days, 1))) 
+            / SUM (p.sale_price*sd.quantity*COALESCE(sd.rental_days, 1))
+            , 2) as difference
+FROM v_customer_value cv
+JOIN v_sales_detail sd ON cv.customer_id = sd.customer_id
+JOIN products p ON sd.product_id = p.product_id
+WHERE cv.customer_type = 'lodge' AND 
+      sd.order_date >= '2026-01-01' AND 
+      sd.order_date < '2027-01-01' AND
+      sd.status != 'cancelled'
+SUM (p.sale_price*sd.quantity*COALESCE(sd.rental_days, 1)) as list_price
+SUM (sd.unit_price*sd.quantity*COALESCE(sd.rental_days, 1)) as real_price
+
+SELECT ROUND(
+    100.0 *
+    (SUM(p.sale_price * i.quantity * COALESCE(i.rental_days, 1))
+    - SUM(i.unit_price * i.quantity * COALESCE(i.rental_days, 1)))
+    / SUM(p.sale_price * i.quantity * COALESCE(i.rental_days, 1)),
+    2
+) AS percentage_gap
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+JOIN order_items i ON o.order_id = i.order_id
+JOIN products p ON i.product_id = p.product_id
+WHERE c.customer_type = 'lodge'
+  AND o.order_date >= '2026-01-01'
+  AND o.order_date < '2027-01-01'
+  AND o.status != 'cancelled';
+
+  SELECT SUM(oi.quantity * oi.unit_price*COALESCE(oi.rental_days, 1)) AS revenue 
+FROM order_items oi JOIN orders o USING (order_id) 
+WHERE o.order_date >= '2026-01-01' AND o.order_date < '2027-01-01' 
+AND o.status IN ('completed','paid')
